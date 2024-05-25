@@ -1,4 +1,5 @@
 ﻿using hauzio.webapi.Connections;
+using hauzio.webapi.DTOs;
 using hauzio.webapi.Entities;
 using hauzio.webapi.Interfaces;
 using Microsoft.Extensions.Options;
@@ -34,5 +35,7 @@ namespace hauzio.webapi.Services
         public async Task UpdateByIdUsuario(string id, Usuario usuario) => await usuarios.ReplaceOneAsync(x => x.Id == id, usuario);
 
         public async Task DeleteByIdUsuario(string id) => await usuarios.DeleteOneAsync(x => x.Id == id);
+
+        public async Task<Usuario> FindByUsernameAndPassword(Login login) => await usuarios.Find(x => x.userName == login.userName && x.password == login.password).FirstOrDefaultAsync();
     }
 }

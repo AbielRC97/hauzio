@@ -22,6 +22,7 @@ public class Startup
         services.Configure<AppConfig>(Configuration.GetSection("MongoDB"));
         services.AddSingleton<IUsuarioService, UsuarioService>();
         services.AddControllers();
+        services.AddControllersWithViews();
         services.AddEndpointsApiExplorer();
         //Se agrega en generador de Swagger
         services.AddSwaggerGen(c =>
@@ -52,6 +53,7 @@ public class Startup
                 IssuerSigningKey = new SymmetricSecurityKey(key)
             };
         });
+        services.AddAuthorization();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -66,6 +68,11 @@ public class Startup
             });
         }
 
+        app.UseDeveloperExceptionPage();
+        app.UseHsts();
+        app.UseHttpsRedirection();
+        app.UseStaticFiles();
+
         app.UseRouting();
 
         app.UseAuthentication();
@@ -73,6 +80,8 @@ public class Startup
 
         app.UseEndpoints(endpoints =>
        {
+           endpoints.MapControllerRoute(name: "default",
+               pattern: "{controller=Home}/{action=Index}/{id?}");
            endpoints.MapControllers();
        });
     }

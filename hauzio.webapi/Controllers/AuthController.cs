@@ -1,40 +1,65 @@
-﻿using hauzio.webapi.Connections;
+﻿using hauzio.webapi.DTOs;
 using hauzio.webapi.Entities;
 using hauzio.webapi.Interfaces;
-using Microsoft.AspNetCore.Http;
+using hauzio.webapi.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
-using MongoDB.Driver;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace hauzio.webapi.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class AuthController : ControllerBase
+    
+    public class AuthController : JwtBaseController
     {
         private readonly ILogger<AuthController> _logger;
         private readonly IUsuarioService _userDB;
-        public AuthController(ILogger<AuthController> logger, IUsuarioService userDB)
+        private readonly IConfiguration _configuration;
+        public AuthController(ILogger<AuthController> logger, IUsuarioService userDB, IConfiguration configuration)
         {
             _logger = logger;
             _userDB = userDB;
+            _configuration = configuration;
         }
-        [HttpGet("/{id:length(24)}")]
-        public async Task<Usuario> GetUsuario(string id) => await _userDB.FindByIdUsuario(id);
+
         [HttpGet()]
+        [Authorize]
         public async Task<List<Usuario>> GetAllUsuarios()
         {
+            var useClaims = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             return await _userDB.GetAllUsuarios();
         }
         [HttpPost()]
+        [Authorize]
         public async Task<Usuario> UsuarioAsync(Usuario usuario)
         {
             usuario.Id = ObjectId.GenerateNewId().ToString(); 
             await _userDB.CreateUsuario(usuario);
             return usuario;
         }
+
+        [HttpPost("/login")]
+        public async Task<object> LoginAsync(Login login)
+        {
+            Usuario usuario = await _userDB.FindByUsernameAndPassword(login);
+            string token = GenerateJwtToken(usuario?.Id!);
+
+            return new
+            {
+                token,
+                user = new
+                {
+                    usuario.userName,
+                    usuario.Id
+                }
+            };
+        }
         [HttpPut("{id:length(24)}")]
+        [Authorize]
         public async Task<Usuario> Update(string id, Usuario user)
         {
             var userDB = await _userDB.FindByIdUsuario(id);
@@ -48,6 +73,7 @@ namespace hauzio.webapi.Controllers
             return user;
         }
         [HttpDelete("{id:length(24)}")]
+        [Authorize]
         public async Task<Usuario> Delete(string id)
         {
             var userDB = await _userDB.FindByIdUsuario(id);
@@ -56,6 +82,32 @@ namespace hauzio.webapi.Controllers
                 return null;
             await _userDB.DeleteByIdUsuario(id);
             return userDB;
+        }
+
+        private string GenerateJwtToken(string id)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]));
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new Claim[]
+                    {
+                    new Claim(ClaimTypes.Name, id)
+                    }),
+                    Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["Jwt:ExpiresInMinutes"])),
+                    Issuer = _configuration["Jwt:Issuer"],
+                    Audience = _configuration["Jwt:Audience"],
+                    SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                return tokenHandler.WriteToken(token);
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
     }
 }
