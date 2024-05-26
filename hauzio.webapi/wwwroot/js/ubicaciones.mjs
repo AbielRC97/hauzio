@@ -5,7 +5,8 @@ const ubicacionesController = (async () => {
         ubicacionId: localStorage.getItem('locationId'),
         loadData: () => {
             $("#btnLocation").show();
-            $("#btnDeleteLocation").hide();
+            $("#btnDeleteLocation").css('visibility', 'hidden');
+            $("#btnUnsubcribe").css('visibility', 'hidden');
             $("#btnLocation").on('click', async (e) => {
                 e.preventDefault();
                 var _formData = {
@@ -46,6 +47,25 @@ const ubicacionesController = (async () => {
                     latitud: 0,
                     longitud: 0,
                     status: true
+                };
+                _formData.negocio = $('#negocio').val();
+                _formData.descripcion = $('#descripcion').val();
+                _formData.latitud = parseFloat($('#latitud').val());
+                _formData.longitud = parseFloat($('#longitud').val());
+                var _ubicacionId = localStorage.getItem('locationId');
+                var _userId = loginController.userToken;
+                var _headers = { headers: { "Authorization": `Bearer ${_userId}` } }
+                var data = await axios.post('/api/FullActions?id=' + _ubicacionId, _formData, _headers);
+                setTimeout(() => { document.location.href = "/Locations" }, 500);
+            });
+            $("#btnUnsubcribe").on('click', async (e) => {
+                e.preventDefault();
+                var _formData = {
+                    negocio: '',
+                    descripcion: '',
+                    latitud: 0,
+                    longitud: 0,
+                    status: false
                 };
                 _formData.negocio = $('#negocio').val();
                 _formData.descripcion = $('#descripcion').val();
