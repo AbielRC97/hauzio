@@ -26,12 +26,11 @@ namespace hauzio.webapi.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet()]
-        [Authorize]
-        public async Task<List<Usuario>> GetAllUsuarios()
+        [HttpGet("/api/HasSession")]
+        public async Task<bool> HasSession()
         {
-            var useClaims = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            return await _userDB.GetAllUsuarios();
+            await Task.Yield();
+            return !string.IsNullOrEmpty(userID);
         }
         [HttpPost()]
         [Authorize]

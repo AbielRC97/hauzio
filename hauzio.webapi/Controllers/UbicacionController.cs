@@ -39,7 +39,12 @@ namespace hauzio.webapi.Controllers
         [Authorize]
         public async Task<Ubicacion> FindById(string id)
         {
-            return await _ubicacionService.FindByIdLocation(id);
+            Usuario userDB = await _userDB.FindByIdUsuario(userID);
+            if (userDB != null && (userDB?.status ?? false))
+            {
+                return await _ubicacionService.FindByIdLocation(id);
+            }
+            return new Ubicacion();
         }
 
         [HttpPost("/api/Insert")]
