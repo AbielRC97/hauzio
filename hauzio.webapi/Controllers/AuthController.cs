@@ -40,6 +40,7 @@ namespace hauzio.webapi.Controllers
         public async Task<Usuario> UsuarioAsync(Usuario usuario)
         {
             usuario.Id = ObjectId.GenerateNewId().ToString();
+            usuario.userName= usuario.userName.ToLower();
             usuario.password = _securityService.CifrarTexto(usuario.password);
             await _userDB.CreateUsuario(usuario);
             return usuario;
@@ -50,6 +51,7 @@ namespace hauzio.webapi.Controllers
         {
             try
             {
+                login.userName = login.userName.ToLower();
                 login.password = _securityService.CifrarTexto(login.password);
                 Usuario usuario = await _userDB.FindByUsernameAndPassword(login);
                 string token = GenerateJwtToken(usuario?.Id!);

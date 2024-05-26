@@ -200,7 +200,7 @@
                     L.marker([item.latitud, item.longitud], { draggable: true }).addTo(map).bindPopup(`
                     <h4> Negocio: ${item.negocio} </h4>
                     <h5> Descripcion: ${item.descripcion}</h5>
-                    <a class="btn btn-outline-warning" href='${'/admin?id=' + item.id}'>Ver</a>
+                    <a class="btn btn-danger text-white" href='${'/admin?id=' + item.id}'>Ver</a>
                 `);
                 });
             }, 100);

@@ -69,6 +69,7 @@ public class Startup
             });*/
         }
 
+
         app.UseDeveloperExceptionPage();
         app.UseHsts();
         app.UseHttpsRedirection();
@@ -78,6 +79,16 @@ public class Startup
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseStatusCodePages(async (opts) =>
+        {
+            await Task.Yield();
+            var response = opts.HttpContext.Response;
+            if(response.StatusCode == 404)
+            {
+                response.Redirect("/Login");
+            }
+        });
 
         app.UseEndpoints(endpoints =>
        {
