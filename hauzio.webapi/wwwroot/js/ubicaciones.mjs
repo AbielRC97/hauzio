@@ -59,7 +59,13 @@
                     $('#latitud').val(data.data.data.latitud);
                     $('#longitud').val(data.data.data.longitud);
                 } else {
-                    Swal.fire(data.data.error);
+                    Swal.fire({
+                        text: data.data.mensaje,
+                        icon: "error",
+                        confirmButtonText: "Aceptar"
+                    }).then((result) => {
+                        window.location.href = "/admin";
+                    });
                 }
             }, 500);
             $("#btnLocation").show();
@@ -98,7 +104,7 @@
                             icon: "error",
                             confirmButtonText: "Aceptar"
                         }).then((result) => {
-                            window.location.reload();
+                            window.location.href = "/admin";
                         });
                     }, 500);
                 }

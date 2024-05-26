@@ -59,7 +59,8 @@ namespace hauzio.webapi.Controllers
                 {
                     Data = null,
                     Error = ex.Message,
-                    Estatus = true
+                    Estatus = false,
+                    Mensaje = "No se encontro la ubicacion"
                 };
             }
         }
@@ -172,7 +173,8 @@ namespace hauzio.webapi.Controllers
                 {
                     Data = null,
                     Error = ex.Message,
-                    Estatus = false
+                    Estatus = false,
+                    Mensaje = "Ocurrio algo al procesar la informacion"
                 };
             }
         }
