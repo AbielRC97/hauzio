@@ -8,7 +8,7 @@
     "environment"    : "hauziowebapi-dev",
     "enable-xray"    : false,
     "enhanced-health-type" : "basic",
-    "additional-options"   : "\"aws:autoscaling:launchconfiguration,SecurityGroups\"=\"sg-0ffb98abc32ec850d\";\"aws:ec2:vpc,Subnets\"=\"subnet-0ed2e30e34bc30877\"",
+    "additional-options"   : "",
     "solution-stack"       : "64bit Amazon Linux 2 v2.7.1 running .NET Core",
     "environment-type"     : "SingleInstance",
     "cname"                : "hauziowebapi-dev",

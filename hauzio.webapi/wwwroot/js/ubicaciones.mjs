@@ -189,19 +189,28 @@
                 var _userId = localStorage.getItem('token');
                 var _headers = { headers: { "Authorization": `Bearer ${_userId}` } }
                 var data = await axios.get('/api/GetAll', _headers);
-                var map = L.map('map')
-                    .setView([19.2087846, -96.2297964], 15);
-                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                }).addTo(map);
-                L.control.scale().addTo(map);
                 if (data.data.length === 0) {
                     Swal.fire({
                         text: "No se encontro alguna ubicacion",
                         icon: "warning"
                     });
                 }
+                // obtnemos latutid y longitud Min max
+
+                const resultado = data.data.reduce((acc, item) => {
+                    return {
+                        minLatitud: Math.min(acc.minLatitud, item.latitud),
+                        maxLongitud: Math.max(acc.maxLongitud, item.longitud),
+                    }
+                }, { minLatitud: 19.2087846, maxLongitud: -96.2297964 });
+
+                var map = L.map('map')
+                    .setView([resultado.minLatitud, resultado.maxLongitud], 15);
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }).addTo(map);
+                L.control.scale().addTo(map);
                 data.data.forEach((item) => {
                     L.marker([item.latitud, item.longitud], { draggable: true }).addTo(map).bindPopup(`
                     <h4> Negocio: ${item.negocio} </h4>
