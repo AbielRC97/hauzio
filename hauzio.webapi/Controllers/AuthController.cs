@@ -12,7 +12,7 @@ using System.Text;
 
 namespace hauzio.webapi.Controllers
 {
-    [Route("api/[controller]")]
+    
     [ApiController]
     public class AuthController : JwtBaseController
     {
@@ -42,7 +42,7 @@ namespace hauzio.webapi.Controllers
             return usuario;
         }
 
-        [HttpPost("/login")]
+        [HttpPost("/api/login")]
         public async Task<object> LoginAsync([FromBody] Login login)
         {
             Usuario usuario = await _userDB.FindByUsernameAndPassword(login);

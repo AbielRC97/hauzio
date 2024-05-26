@@ -3,6 +3,8 @@ using System.Security.Claims;
 
 namespace hauzio.webapi.Security
 {
+
+    [Route("api/[controller]")]
     public class JwtBaseController: Controller
     {
         public string userID

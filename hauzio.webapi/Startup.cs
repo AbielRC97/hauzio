@@ -21,6 +21,7 @@ public class Startup
         //Agregamos la configuracion a la BD  de mongoDB
         services.Configure<AppConfig>(Configuration.GetSection("MongoDB"));
         services.AddSingleton<IUsuarioService, UsuarioService>();
+        services.AddSingleton<IUbicacionService, UbicacionService>();
         services.AddControllers();
         services.AddControllersWithViews();
         services.AddEndpointsApiExplorer();

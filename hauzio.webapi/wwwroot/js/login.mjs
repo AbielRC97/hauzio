@@ -1,7 +1,6 @@
 ﻿
-(() => {
-    var loginController = {
-        token: $('#token').val(),
+const loginController = (() => {
+    var login = {
         loadData: () => {
             $("#btnLogin").on('click', async (e) => {
                 e.preventDefault();
@@ -11,13 +10,18 @@
                 };
                 _formData.userName = $('#username').val();
                 _formData.password = $('#password').val();
-                var data = await axios.post('/login', _formData);
-                $('#token').val(data.data.token);
-                window.location.href = '/Locations';
+                var data = await axios.post('/api/login', _formData);
+                localStorage.setItem("token", data.data.token);
+                setTimeout(() => { document.location.href = "/Locations" }, 500);
             });
         },
     }
     jQuery(function ($) {
-        loginController.loadData();
+        login.loadData();
     });
+    return {
+        userToken: localStorage.getItem('token'),
+    };
 })();
+
+export default loginController;
