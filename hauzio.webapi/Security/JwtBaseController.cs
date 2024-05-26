@@ -15,5 +15,7 @@ namespace hauzio.webapi.Security
                 return User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value ?? string.Empty;
             }
         }
+
+        
     }
 }

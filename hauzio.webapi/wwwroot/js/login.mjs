@@ -11,8 +11,12 @@ const loginController = (() => {
                 _formData.userName = $('#username').val();
                 _formData.password = $('#password').val();
                 var data = await axios.post('/api/login', _formData);
-                localStorage.setItem("token", data.data.token);
-                setTimeout(() => { document.location.href = "/Locations" }, 500);
+                if (data.data.estatus) {
+                    localStorage.setItem("token", data.data.data);
+                    setTimeout(() => { window.location.href = "/admin"; }, 500);
+                } else {
+                    setTimeout(() => { Swal.fire(data.data.error); }, 500);
+                }
             });
         },
 

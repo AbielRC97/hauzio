@@ -4,7 +4,6 @@ using hauzio.webapi.Interfaces;
 using hauzio.webapi.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace hauzio.webapi.Controllers
 {
@@ -37,24 +36,61 @@ namespace hauzio.webapi.Controllers
         [HttpGet]
         [Route("/api/FindById")]
         [Authorize]
-        public async Task<Ubicacion> FindById(string id)
+        public async Task<RespuestaDTO<Ubicacion>> FindById(string id)
         {
-            Usuario userDB = await _userDB.FindByIdUsuario(userID);
-            if (userDB != null && (userDB?.status ?? false))
+            try
             {
-                return await _ubicacionService.FindByIdLocation(id);
+                Usuario userDB = await _userDB.FindByIdUsuario(userID);
+                if (userDB != null && (userDB?.status ?? false))
+                {
+                    var ubicacionDB = await _ubicacionService.FindByIdLocation(id);
+                    return new RespuestaDTO<Ubicacion>()
+                    {
+                        Data = ubicacionDB,
+                        Error = null,
+                        Estatus = true
+                    };
+                }
+                throw new Exception("Ocurrio un error!");
             }
-            return new Ubicacion();
+            catch (Exception ex)
+            {
+                return new RespuestaDTO<Ubicacion>()
+                {
+                    Data = null,
+                    Error = ex.Message,
+                    Estatus = true
+                };
+            }
         }
 
         [HttpPost("/api/Insert")]
         [Authorize]
-        public async Task  insertLocation([FromBody] UbicacionDTO ubicacionDTO)
+        public async Task<RespuestaDTO<string>> insertLocation([FromBody] UbicacionDTO ubicacionDTO)
         {
-            Usuario userDB = await _userDB.FindByIdUsuario(userID);
-            if(userDB != null && (userDB?.status ?? false))
+            try
             {
-                await _ubicacionService.InsertLocation(ubicacionDTO);
+                Usuario userDB = await _userDB.FindByIdUsuario(userID);
+                if (userDB != null && (userDB?.status ?? false))
+                {
+                    await _ubicacionService.InsertLocation(ubicacionDTO);
+                    return new RespuestaDTO<string>
+                    {
+                        Data = $"Se guardo correctamente la ubicacion {ubicacionDTO.negocio}",
+                        Error = string.Empty,
+                        Estatus = true
+                    };
+                }
+                throw new Exception("Ocurrio un error al guardar la ubicacion");
+            }
+            catch (Exception ex)
+            {
+                return new RespuestaDTO<string>
+                {
+                    Data = string.Empty,
+                    Error = ex.Message,
+                    Estatus = true
+                };
             }
         }
 
@@ -62,38 +98,83 @@ namespace hauzio.webapi.Controllers
         [Authorize]
         public async Task<List<Ubicacion>> FindAllLocations()
         {
-            Usuario userDB = await _userDB.FindByIdUsuario(userID);
-            if (userDB != null && (userDB?.status ?? false))
+            try
             {
-                return (await _ubicacionService.FindAllLocations());
+                Usuario userDB = await _userDB.FindByIdUsuario(userID);
+                if (userDB != null && (userDB?.status ?? false))
+                {
+                    var ubicaiconesDB = await _ubicacionService.FindAllLocations();
+                    return ubicaiconesDB;
+                }
+                throw new Exception();
             }
-            return new List<Ubicacion>();
+            catch (Exception)
+            {
+                return new List<Ubicacion>();
+            }
         }
         [HttpGet("/api/FindByName")]
         [Authorize]
         public async Task<List<Ubicacion>> FindAllLocations(string? name)
         {
-            Usuario userDB = await _userDB.FindByIdUsuario(userID);
-            if (userDB != null && (userDB?.status ?? false))
+            try
             {
-                return (await _ubicacionService.FindAllLocations());
+                Usuario userDB = await _userDB.FindByIdUsuario(userID);
+                if (userDB != null && (userDB?.status ?? false))
+                {
+                    return (await _ubicacionService.FindAllLocations());
+                }
+                throw new Exception();
             }
-            return new List<Ubicacion>();
+            catch (Exception)
+            {
+                return new List<Ubicacion>();
+            }
         }
 
         [HttpPost("/api/FullActions")]
         [Authorize]
-        public async Task<Ubicacion> AllActionsLocations(string? id,[FromBody] UbicacionDTO? ubicacionDTO = null)
+        public async Task<RespuestaDTO<Ubicacion>> AllActionsLocations(string? id, [FromBody] UbicacionDTO? ubicacionDTO = null)
         {
-            Usuario userDB = await _userDB.FindByIdUsuario(userID);
-            if (userDB != null && (userDB?.status ?? false))
+            try
             {
-                if(!string.IsNullOrEmpty(id) && ( string.IsNullOrEmpty(ubicacionDTO?.negocio) || string.IsNullOrEmpty(ubicacionDTO.descripcion)))
-                    return (await _ubicacionService.DeleteByIdLocation(id!));
-                else if(!string.IsNullOrEmpty(id) && ubicacionDTO != null)
-                    return (await _ubicacionService.UpdateByIDLocation(id!, ubicacionDTO)); 
+                Usuario userDB = await _userDB.FindByIdUsuario(userID);
+                if (userDB != null && (userDB?.status ?? false))
+                {
+                    if (!string.IsNullOrEmpty(id) && (string.IsNullOrEmpty(ubicacionDTO?.negocio) || string.IsNullOrEmpty(ubicacionDTO.descripcion)))
+                    {
+                        var ubicacionDB = await _ubicacionService.DeleteByIdLocation(id!);
+                        return new RespuestaDTO<Ubicacion>()
+                        {
+                            Data = ubicacionDB,
+                            Mensaje = $"Se elimino ubicacion {ubicacionDB.negocio} correctamente",
+                            Error = string.Empty,
+                            Estatus = true
+                        };
+                    }
+                    else if (!string.IsNullOrEmpty(id) && ubicacionDTO != null)
+                    {
+                        var ubicacionDB = await _ubicacionService.UpdateByIDLocation(id!, ubicacionDTO);
+                        return new RespuestaDTO<Ubicacion>()
+                        {
+                            Data = ubicacionDB,
+                            Mensaje = $"Se Actualizo ubicacion {ubicacionDB.negocio} correctamente",
+                            Error = string.Empty,
+                            Estatus = true
+                        };
+                    }
+                }
+                throw new Exception("Ocurrio un error");
             }
-            return new Ubicacion();
+            catch (Exception ex)
+            {
+                return new RespuestaDTO<Ubicacion>()
+                {
+                    Data = null,
+                    Error = ex.Message,
+                    Estatus = false
+                };
+            }
         }
     }
 }

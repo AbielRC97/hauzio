@@ -28,6 +28,8 @@ namespace hauzio.webapi.Services
         }
         public async Task InsertLocation(UbicacionDTO ubicacionDTO)
         {
+            if (!ubicacionDTO.EsValido())
+                throw new Exception("No se puede agregar la ubicacion");
             Ubicacion nueva = new Ubicacion();
             nueva.Id = ObjectId.GenerateNewId().ToString();
             nueva.descripcion = ubicacionDTO.descripcion;
@@ -51,6 +53,8 @@ namespace hauzio.webapi.Services
 
         public async Task<Ubicacion> UpdateByIDLocation(string id, UbicacionDTO ubicacionDTO)
         {
+            if (!ubicacionDTO.EsValido())
+                throw new Exception("No se puede actualizar la ubicacion");
             Ubicacion locationDB = ubicacionDTO.BuildLocation(id);
             if (!locationDB.status)
             {

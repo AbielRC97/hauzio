@@ -20,5 +20,6 @@ namespace hauzio.webapi.DTOs
             status = this.status,
             negocio = this.negocio
         };
+        public virtual bool EsValido() => !string.IsNullOrEmpty(this.negocio) && !string.IsNullOrEmpty(descripcion);
     }
 }

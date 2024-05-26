@@ -1,6 +1,9 @@
 ﻿const ubicacionesController = (async () => {
     var ubicaciones = {
         ubicacionId: localStorage.getItem('locationId'),
+        goout: () => {
+
+        },
         loadData: () => {
             $("#btnLocation").show();
             $("#btnDeleteLocation").css('visibility', 'hidden');
@@ -20,7 +23,27 @@
                 var _userId = localStorage.getItem('token');
                 var _headers = { headers: { "Authorization": `Bearer ${_userId}` } }
                 var data = await axios.post('/api/Insert', _formData, _headers);
-                setTimeout(() => { window.location.reload(); }, 500);
+                if (data.data.estatus) {
+                    setTimeout(() => {
+                        Swal.fire({
+                            text: data.data.data,
+                            icon: "success",
+                            confirmButtonText: "Aceptar"
+                        }).then((result) => {
+                            window.location.reload();
+                        });
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        Swal.fire({
+                            text: data.data.error,
+                            icon: "error",
+                            confirmButtonText: "Aceptar"
+                        }).then((result) => {
+                            window.location.reload();
+                        });
+                    }, 500);
+                }
             });
         },
         loadDataById: (_id) => {
@@ -30,10 +53,14 @@
                 var _userId = localStorage.getItem('token');
                 var _headers = { headers: { "Authorization": `Bearer ${_userId}` } }
                 var data = await axios.get('/api/FindById?id=' + _ubicacionId, _headers);
-                $('#negocio').val(data.data.negocio);
-                $('#descripcion').val(data.data.descripcion);
-                $('#latitud').val(data.data.latitud);
-                $('#longitud').val(data.data.longitud);
+                if (data.data.estatus) {
+                    $('#negocio').val(data.data.data.negocio);
+                    $('#descripcion').val(data.data.data.descripcion);
+                    $('#latitud').val(data.data.data.latitud);
+                    $('#longitud').val(data.data.data.longitud);
+                } else {
+                    Swal.fire(data.data.error);
+                }
             }, 500);
             $("#btnLocation").show();
             $("#btnDeleteLocation").show();
@@ -54,7 +81,28 @@
                 var _userId = localStorage.getItem('token');
                 var _headers = { headers: { "Authorization": `Bearer ${_userId}` } }
                 var data = await axios.post('/api/FullActions?id=' + _ubicacionId, _formData, _headers);
-                setTimeout(() => { window.location.reload(); }, 500);
+                if (data.data.estatus) {
+                    setTimeout(() => {
+                        Swal.fire({
+                            text: data.data.mensaje,
+                            icon: "success",
+                            confirmButtonText: "Aceptar"
+                        }).then((result) => {
+                            window.location.href = "/admin";
+                        });
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        Swal.fire({
+                            text: data.data.mensaje,
+                            icon: "error",
+                            confirmButtonText: "Aceptar"
+                        }).then((result) => {
+                            window.location.reload();
+                        });
+                    }, 500);
+                }
+
             });
             $("#btnUnsubcribe").on('click', async (e) => {
                 e.preventDefault();
@@ -73,7 +121,27 @@
                 var _userId = localStorage.getItem('token');
                 var _headers = { headers: { "Authorization": `Bearer ${_userId}` } }
                 var data = await axios.post('/api/FullActions?id=' + _ubicacionId, _formData, _headers);
-                setTimeout(() => { window.location.reload(); }, 500);
+                if (data.data.estatus) {
+                    setTimeout(() => {
+                        Swal.fire({
+                            text: data.data.mensaje,
+                            icon: "success",
+                            confirmButtonText: "Aceptar"
+                        }).then((result) => {
+                            window.location.href = "/admin";
+                        });
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        Swal.fire({
+                            text: data.data.mensaje,
+                            icon: "error",
+                            confirmButtonText: "Aceptar"
+                        }).then((result) => {
+                            window.location.reload();
+                        });
+                    }, 500);
+                }
             });
             $("#btnDeleteLocation").on('click', async (e) => {
                 e.preventDefault();
@@ -87,7 +155,27 @@
                 var _userId = localStorage.getItem('token');
                 var _headers = { headers: { "Authorization": `Bearer ${_userId}` } }
                 var data = await axios.post('/api/FullActions?id=' + _ubicacionId, _formData, _headers);
-                setTimeout(() => { document.location.href = "/admin" }, 500);
+                if (data.data.estatus) {
+                    setTimeout(() => {
+                        Swal.fire({
+                            text: data.data.mensaje,
+                            icon: "success",
+                            confirmButtonText: "Aceptar"
+                        }).then((result) => {
+                            window.location.href = "/admin";
+                        });
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        Swal.fire({
+                            text: data.data.mensaje,
+                            icon: "error",
+                            confirmButtonText: "Aceptar"
+                        }).then((result) => {
+                            window.location.reload();
+                        });
+                    }, 500);
+                }
             });
         },
         loadLocations: () => {
@@ -102,6 +190,12 @@
                     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 }).addTo(map);
                 L.control.scale().addTo(map);
+                if (data.data.length === 0) {
+                    Swal.fire({
+                        text: "No se encontro alguna ubicacion",
+                        icon: "warning"
+                    });
+                }
                 data.data.forEach((item) => {
                     L.marker([item.latitud, item.longitud], { draggable: true }).addTo(map).bindPopup(`
                     <h4> Negocio: ${item.negocio} </h4>
@@ -124,6 +218,10 @@
                 if (data.data === false) {
                     document.location.href = "/login";
                 } else {
+                    $('#goout').on('click', () => {
+                        localStorage.clear();
+                        document.location.href = "/login";
+                    });
                     const urlParams = new URLSearchParams(window.location.search);
                     if (window.location.pathname.includes("locations")) {
                         ubicaciones.loadLocations();

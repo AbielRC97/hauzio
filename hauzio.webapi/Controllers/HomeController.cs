@@ -10,11 +10,5 @@ namespace hauzio.webapi.Connections
         {
             return View();
         }
-        [HttpGet]
-        [Route("/api/Locations")]
-        public IActionResult Location()
-        {
-            return View();
-        }
     }
 }

@@ -8,22 +8,25 @@ using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace hauzio.webapi.Controllers
 {
-    
+
     [ApiController]
     public class AuthController : JwtBaseController
     {
         private readonly ILogger<AuthController> _logger;
         private readonly IUsuarioService _userDB;
         private readonly IConfiguration _configuration;
-        public AuthController(ILogger<AuthController> logger, IUsuarioService userDB, IConfiguration configuration)
+        private readonly ISecurityService _securityService;
+        public AuthController(ILogger<AuthController> logger, IUsuarioService userDB, IConfiguration configuration, ISecurityService securityService)
         {
             _logger = logger;
             _userDB = userDB;
             _configuration = configuration;
+            _securityService = securityService;
         }
 
         [HttpGet("/api/HasSession")]
@@ -32,11 +35,12 @@ namespace hauzio.webapi.Controllers
             await Task.Yield();
             return !string.IsNullOrEmpty(userID);
         }
-        [HttpPost()]
+        [HttpPost("/api/InsertUser")]
         [Authorize]
         public async Task<Usuario> UsuarioAsync(Usuario usuario)
         {
-            usuario.Id = ObjectId.GenerateNewId().ToString(); 
+            usuario.Id = ObjectId.GenerateNewId().ToString();
+            usuario.password = _securityService.CifrarTexto(usuario.password);
             await _userDB.CreateUsuario(usuario);
             return usuario;
         }
@@ -44,18 +48,27 @@ namespace hauzio.webapi.Controllers
         [HttpPost("/api/login")]
         public async Task<object> LoginAsync([FromBody] Login login)
         {
-            Usuario usuario = await _userDB.FindByUsernameAndPassword(login);
-            string token = GenerateJwtToken(usuario?.Id!);
-
-            return new
+            try
             {
-                token,
-                user = new
+                login.password = _securityService.CifrarTexto(login.password);
+                Usuario usuario = await _userDB.FindByUsernameAndPassword(login);
+                string token = GenerateJwtToken(usuario?.Id!);
+                return new RespuestaDTO<string>
                 {
-                    usuario.userName,
-                    usuario.Id
-                }
-            };
+                    Data = token,
+                    Error = string.Empty,
+                    Estatus = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new RespuestaDTO<string>
+                {
+                    Data = string.Empty,
+                    Error = "Credenciales no validas",
+                    Estatus = false
+                };
+            }
         }
         [HttpPut("{id:length(24)}")]
         [Authorize]
@@ -85,28 +98,22 @@ namespace hauzio.webapi.Controllers
 
         private string GenerateJwtToken(string id)
         {
-            try
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]));
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]));
-                var tokenDescriptor = new SecurityTokenDescriptor
+                Subject = new ClaimsIdentity(new Claim[]
                 {
-                    Subject = new ClaimsIdentity(new Claim[]
-                    {
                     new Claim(ClaimTypes.Name, id)
-                    }),
-                    Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["Jwt:ExpiresInMinutes"])),
-                    Issuer = _configuration["Jwt:Issuer"],
-                    Audience = _configuration["Jwt:Audience"],
-                    SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
-                };
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                return tokenHandler.WriteToken(token);
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["Jwt:ExpiresInMinutes"])),
+                Issuer = _configuration["Jwt:Issuer"],
+                Audience = _configuration["Jwt:Audience"],
+                SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
+        
     }
 }

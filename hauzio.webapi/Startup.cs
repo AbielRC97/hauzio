@@ -20,17 +20,18 @@ public class Startup
     {
         //Agregamos la configuracion a la BD  de mongoDB
         services.Configure<AppConfig>(Configuration.GetSection("MongoDB"));
-        services.AddSingleton<IUsuarioService, UsuarioService>();
-        services.AddSingleton<IUbicacionService, UbicacionService>();
+        services.AddScoped<IUsuarioService, UsuarioService>();
+        services.AddScoped<IUbicacionService, UbicacionService>();
+        services.AddSingleton<ISecurityService, SecurityService>();
         services.AddControllers();
         services.AddControllersWithViews();
         services.AddEndpointsApiExplorer();
         //Se agrega en generador de Swagger
-        services.AddSwaggerGen(c =>
+        /*services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo
             { Title = "Api Hauzio REST", Version = "v1" });
-        });
+        });*/
 
         // Configurar la autenticación JWT
         var key = Encoding.ASCII.GetBytes(Configuration["Jwt:Key"]);
@@ -61,11 +62,11 @@ public class Startup
     {
         if (env.IsDevelopment())
         {
-            app.UseSwagger();
+            /*app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Api Hauzio REST");
-            });
+            });*/
         }
 
         app.UseDeveloperExceptionPage();
