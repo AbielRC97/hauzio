@@ -64,7 +64,6 @@ public class Startup
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Api Hauzio REST");
-                c.RoutePrefix = string.Empty;
             });
         }
 

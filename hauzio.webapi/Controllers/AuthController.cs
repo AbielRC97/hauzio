@@ -13,7 +13,7 @@ using System.Text;
 namespace hauzio.webapi.Controllers
 {
     [Route("api/[controller]")]
-    
+    [ApiController]
     public class AuthController : JwtBaseController
     {
         private readonly ILogger<AuthController> _logger;
@@ -43,7 +43,7 @@ namespace hauzio.webapi.Controllers
         }
 
         [HttpPost("/login")]
-        public async Task<object> LoginAsync(Login login)
+        public async Task<object> LoginAsync([FromBody] Login login)
         {
             Usuario usuario = await _userDB.FindByUsernameAndPassword(login);
             string token = GenerateJwtToken(usuario?.Id!);
