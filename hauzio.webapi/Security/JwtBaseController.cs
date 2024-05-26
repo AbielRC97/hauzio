@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace hauzio.webapi.Security
 {
-    public class JwtBaseController: ControllerBase
+    public class JwtBaseController: Controller
     {
         public string userID
         {

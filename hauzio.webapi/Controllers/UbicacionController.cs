@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace hauzio.webapi.Connections
+namespace hauzio.webapi.Controllers
 {
-    public class HomeController : Controller
+    public class UbicacionController : Controller
     {
         [HttpGet]
-        [Route("/Login")]
+        [Route("/locations")]
         public IActionResult Index()
         {
             return View();
         }
+
         [HttpGet]
-        [Route("/api/Locations")]
-        public IActionResult Location()
+        [Route("/Register")]
+        public IActionResult Register()
         {
             return View();
         }
