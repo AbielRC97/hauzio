@@ -196,16 +196,12 @@
                     });
                 }
                 // obtnemos latutid y longitud Min max
-
-                const resultado = data.data.reduce((acc, item) => {
-                    return {
-                        minLatitud: Math.min(acc.minLatitud, item.latitud),
-                        maxLongitud: Math.max(acc.maxLongitud, item.longitud),
-                    }
-                }, { minLatitud: 19.2087846, maxLongitud: -96.2297964 });
+                var numLocations = data.data.length > 0 ? data.data.length : 1;
+                var avgLatitud = data.data.reduce((acc, crr) => acc + crr.latitud, 0) / numLocations;
+                var avgLongitud = data.data.reduce((acc, crr) => acc + crr.longitud, 0) / numLocations;
 
                 var map = L.map('map')
-                    .setView([resultado.minLatitud, resultado.maxLongitud], 15);
+                    .setView([avgLatitud, avgLongitud], 10);
                 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
                     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
